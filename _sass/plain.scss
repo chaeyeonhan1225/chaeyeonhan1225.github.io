@@ -2,6 +2,13 @@
 @import "ext/normalize";
 @import "syntax";
 
+@font-face {
+	font-family: 'Noto Sans KR';
+	src: url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100&display=swap');
+	font-weight: normal;
+	font-style: normal;
+}
+
 $linkColor: #0a59b0;
 $mobileW: 768px;
 $smallMobileW: 480px;
@@ -15,7 +22,7 @@ $leftWidth: 220px;
 }
 
 body {
-  font-family: "Raleway", sans-serif;
+  font-family: "'Noto Sans KR'","Raleway", sans-serif;
   font-size: 16px;
   line-height: 1.2em;
   margin: 0;
@@ -243,8 +250,8 @@ main {
   padding-left: 30px;
 }
 .post {
-  font-family: "Merriweather", sans-serif;
-  font-weight: 300;
+  font-family: "Noto Sans KR","Merriweather", sans-serif;
+  font-weight: 500;
   color: #222;
   line-height: 1.9em;
   p {
