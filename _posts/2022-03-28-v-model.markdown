@@ -1,0 +1,217 @@
+---
+layout: post
+title:  "v-model 커스텀하기"
+future: true
+date:   2022-03-28 00:40:00 +0900
+categories: Vue
+---
+# v-model
+vue에서는 `v-model`이라는 디렉티브를 제공해준다. `v-model`을 사용하면 **데이터 양방향 바인딩**을 할 수 있다.
+```html
+<input v-model="name" />
+```
+위 코드처럼 input이나 checkbox, radiobox에 `v-model`디렉티브를 추가해 `data` 있는 변수를 넣어주면 input이벤트 또는 select 이벤트가 발생할때마다 `name`에 자동으로 바인딩된다.
+
+위의 코드는 아래와 같다.
+```html
+<input :value="name" @input="onInput" />
+...
+mehtods: {
+    onInput(e) {
+        this.name = e;
+    }
+}
+```
+input 컴포넌트에 무언가를 입력하면 input 이벤트가 발생하고, 이 이벤트가 일어날때마다 onInput 메소드가 실행되며, name을 그 변경된 값으로 업데이트 해준다. **v-model**은 이 과정을 축약해준것이다.
+
+> checkbox, radio button는 checked 이벤트가 발생하면 data를 업데이트 해준다.
+
+## modifiers
+또한 modifiers도 제공해주고 있어서 요긴하게 활용할 수 있다.
+- `lazy`: input 이벤트가 아닌 change 이벤트에서 바인딩한다.
+    - 폼에서 포커스를 벗어난 후에 데이터 바인딩을 해준다.
+- `trim`: 좌우 공백을 제거해주고 바인딩 해준다.
+- `number`: 숫자가 될 수 있는 String 타입의 값일 경우 숫자로 변경해준다. 물론 숫자가 아닌 String이면 그냥 String으로 바인딩해준다.
+
+
+## 컴포넌트에서의 v-model 활용
+`v-model`은 기본적으로 `value`를 사용하고 input 이벤트를 사용하지만 컴포넌트에서 사용할때는 `model` 옵션을 사용하여 변경해줄 수 있다.
+
+예를 들어 자식 컴포넌트인 `EmailInput.vue`가 있다. 이 컴포넌트는 id는 input으로, domain은 select로 입력을 받는역할을 한다.
+
+![EmailInput](/assets/img/Emailinput.png )
+
+`EmailInput.vue` 컴포넌트를 사용하는 부모 컴포넌트는
+-  EmailInput의 value로 `test@gmail.com`(예시) 를 주고(초기값이 있는 경우), EmailInput의 결과값을 test, gmail.com이 아닌 `test@gmail.com` 로 받는다.
+- input 이벤트가 아닌 change 이벤트가 발생 하는 경우 값을 받는다.
+
+위의 요구 사항을 만족하려면 아래의 두 가지를 구현하면 된다.
+- `EmailInput`에서 입력값을 한 번 원하는 값으로 바꾼 뒤에 이벤트를 발생시킨다.
+- `change` 이벤트가 발생했을때 `v-model`의 값을 갱신한다.
+
+`EmailInput.vue`
+```html
+<template>
+  <div>
+    <div>이메일을 입력하세요</div>
+    <form @change="onChange">
+      <input v-model="id" />
+      <span class="at">@</span>
+      <select name="domain" id="domain" v-model="domain">
+        <option value="naver.com">naver.com</option>
+        <option value="gmail.com">gmail.com</option>
+      </select>
+    </form>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+export default Vue.extend({
+  name: "NameInput",
+  props: {
+    value: {
+      type: String, // 부모 컴포넌트에서 v-model에 넣은 값은 value 이다.
+      required: true,
+    },
+  },
+  model: {
+    event: "change", // change 이벤트가 발생할때 v-model의 값을 갱신한다.
+  },
+  data(): {
+    id: string;
+    domain: string;
+  } {
+    return {
+      id: this.value ? this.value.split("@")[0] : "", // 초기값이 있으면 id의 초기값을 설정한다.
+      domain: this.value ? this.value.split("@")[1] : "naver.com", // 초기값이 있으면 domain의 초기값을 설정한다.
+    };
+  },
+  computed: {
+    email(): string {
+      return `${this.id}@${this.domain}`;
+    },
+  },
+  methods: {
+    onChange() {
+      this.$emit("change", this.email);
+    },
+  },
+});
+</script>
+
+<style scoped>
+.at {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+</style>
+
+```
+`HomeView.vue`
+```html
+<template>
+  <div class="home">
+    <email-input v-model="email"></email-input>
+    {{ email }}
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+import EmailInput from "@/components/EmailInput.vue";
+
+export default Vue.extend({
+  name: "HomeView",
+  components: {
+    EmailInput,
+  },
+  data(): { email: string } {
+    return {
+      email: "test@naver.com",
+    };
+  },
+});
+</script>
+
+<style scoped>
+.home {
+  text-align: center;
+}
+</style>
+
+```
+`v-model`은 기본적으로 `value`라는 이름을 `props`으로 사용하므로 다른 변수를 사용하고 싶을 시에는 `model` 속성을 선언해서 변경해줄 수 있다.
+
+ `EmailInput`내에서 `value`가 아닌 다른 이름으로 사용하고 싶으면 `model`의 `props`를 변경해준다.
+
+```html
+<template>
+  <div>
+    <div>이메일을 입력하세요</div>
+    <form @change="onChange">
+      <input v-model="id" />
+      <span class="at">@</span>
+      <select name="domain" id="domain" v-model="domain">
+        <option value="naver.com">naver.com</option>
+        <option value="gmail.com">gmail.com</option>
+      </select>
+      {{ id }}{{ domain }}
+    </form>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+export default Vue.extend({
+  name: "NameInput",
+  props: {
+    userEmail: {
+      type: String, // 부모 컴포넌트에서 v-model에 넣은 값은 value 이다. -> userEmail로 변경
+      required: true,
+    },
+  },
+  model: {
+    prop: "userEmail", // value 대신 userEmail을 사용한다.
+    event: "change", // change 이벤트가 발생할때 v-model의 값을 갱신한다.
+  },
+  data(): {
+    id: string;
+    domain: string;
+  } {
+    return {
+      id: this.userEmail ? this.userEmail.split("@")[0] : "", // 초기값이 있으면 id의 초기값을 설정한다.
+      domain: this.userEmail ? this.userEmail.split("@")[1] : "naver.com", // 초기값이 있으면 domain의 초기값을 설정한다.
+    };
+  },
+  computed: {
+    email(): string {
+      return `${this.id}@${this.domain}`;
+    },
+  },
+  methods: {
+    onChange() {
+      this.$emit("change", this.email);
+    },
+  },
+});
+</script>
+
+<style scoped>
+.at {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+</style>
+
+```
+`change` 이벤트가 발생할때마다 부모 컴포넌트 HomeView의 email 값이 변경되는 걸 확인할 수 있다.
+
+![EmailInputTest](/assets/img/EmailinputTest.gif )
+
+## 결론
+- `v-model` 을 활용하여 원하는 이벤트가 발생할 때 부모 컴포넌트로 값을 보내줄 수 있다.
+- `model` 속성을 활용해 `v-model`의 보조변수와 이벤트를 커스텀할 수 있다.
+
+## 참고
+- [vue.js 공식문서](https://kr.vuejs.org/v2/guide/components.html#%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EC%9D%98-v-model-%EC%82%AC%EC%9A%A9%EC%9E%90-%EC%A0%95%EC%9D%98)
