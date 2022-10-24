@@ -19,6 +19,7 @@ layout: default
   <div class="post">
     {{ content }}
   </div>
+  <div>
   <script src="https://utteranc.es/client.js"
         repo="chaeyeonhan1225/chaeyeonhan1225.github.io"
         issue-term="url"
@@ -26,6 +27,7 @@ layout: default
         crossorigin="anonymous"
         async>
   </script>
+  </div>
   {%- if site.plainwhite.disqus_shortname -%}
   <div id="disqus_thread" style="margin-top:25px"></div>
   
@@ -45,3 +47,9 @@ layout: default
       powered by Disqus.</a></noscript>
   {%- endif -%}
 </div>
+
+<style>
+.utterances {
+  max-width: 100% !important;
+}
+</style>
