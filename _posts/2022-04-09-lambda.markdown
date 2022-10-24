@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "AWS Lambda"
+title:  "AWS Lambda의 Cold Start, Warm Start"
 future: true
 date:   2022-04-09 00:40:00 +0900
 categories: aws lambda
 ---
-# Lambda
+# Lambda란?
 람다는 개발자가 프로비저닝할 필요 없이, 함수만 작성하면 되는 컴퓨팅 서비스이다.  
 
 ![출처: 위키](/assets/img/aws_lambda.png)

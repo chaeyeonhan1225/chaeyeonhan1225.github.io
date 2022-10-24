@@ -19,8 +19,16 @@ layout: default
   <div class="post">
     {{ content }}
   </div>
+  <script src="https://utteranc.es/client.js"
+        repo="chaeyeonhan1225/chaeyeonhan1225.github.io"
+        issue-term="url"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+  </script>
   {%- if site.plainwhite.disqus_shortname -%}
   <div id="disqus_thread" style="margin-top:25px"></div>
+  
   <script>
     var disqus_config = function () {
       this.page.url = '{{ page.url | absolute_url }}';

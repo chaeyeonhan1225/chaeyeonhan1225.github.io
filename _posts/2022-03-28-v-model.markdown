@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "v-model 커스텀하기"
+title:  "Vue v-model 커스텀하기"
 future: true
 date:   2022-03-28 00:40:00 +0900
 categories: Vue
