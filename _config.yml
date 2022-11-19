@@ -2,9 +2,7 @@ title: ChaeyeonDevBlog
 author: GitHub User
 email: gkscodus11@gmail.com
 description: > # this means to ignore newlines until "show_exerpts:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  안녕하세요!
 show_excerpts: false # set to true to show excerpts on the homepage
 
 # Minima date format
@@ -18,7 +16,7 @@ plainwhite:
   sitemap: true # set to true to generate sitemap.xml content
   search: true # set to true to enable searchbar
   dark_mode: false # set to true to add dark mode toggle
-  portfolio_image: "assets/profile.png" # the path from the base directory of the site to the image to display (no / at the start)
+  portfolio_image: "https://avatars.githubusercontent.com/u/55744163?s=400&u=9d08e16f04f45c4047d549a36206e536ae56a74a&v=4" # the path from the base directory of the site to the image to display (no / at the start)
   html_lang: "KR" # set the lang attribute of the <html> tag for the pages. See here for a list of codes: https://www.w3schools.com/tags/ref_country_codes.asp
   condensed_mobile:
     #- home
@@ -27,8 +25,8 @@ plainwhite:
   # generate social links in footer
   social_links:
     #twitter: samarsault
-    github:  samarsault
-    linkedIn: in/samarsault
+    github: chaeyeonhan1225
+    linkedIn: in/%EC%B1%84%EC%97%B0-%ED%95%9C-23167020b/
     #dribbble: jekyll
     #flickr:   jekyll
     #instagram: jekyll
