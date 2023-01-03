@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "Spring Boot + Kotlin에서 JPA Repository mokking하기(MockK)"
+title:  "MockK 시작하기"
 future: true
 date:   2022-12-12 00:00:00 +0900
 categories: Spring MockK Kotlin
 ---
-Spring Boot + Kotlin 조합으로 단뒤 테스트 코드를 짜다 보면 repository를 어떻게 주입해줘야할지 고민이 된다. 이럴때 주로 가짜로 구현체를 만들어서 주입해주게 되는데 테스트할 클래스가 `JPARepository`를 바라보고 있는 경우에는 가짜 구현체에 구현해줄게 너무 많다. 그래서 여러가지 방법을 찾다가 moking 라이브러리를 사용하기로 하였는데 서치중 mockK를 어떻게 사용했는지 기록하고자 한다.
+Spring Boot + Kotlin 조합으로 유닛 테스트 코드를 짜다 보면 repository를 어떻게 주입해줘야할지 고민이 된다. 이럴때 주로 가짜로 구현체를 만들어서 주입해주게 되는데 테스트할 클래스가 `JPARepository`를 바라보고 있는 경우에는 가짜 구현체에 구현해줄게 너무 많다. 그래서 여러가지 방법을 찾다가 moking 라이브러리를 사용하기로 하였는데 서치중 mockK를 어떻게 사용했는지 기록하고자 한다.
 
 # MockK
 
@@ -144,10 +144,39 @@ class MemoApplicationTest {
 
 ### 에러 테스트하기
 `every`키워드의 answer로 에러도 throw할 수 있다.
-요건 좀 있다 작성하기 ~
+예를 들어 TestService라는 인터페이스가 있고, 그 인터페이스를 구현하는 서비스가 있다고 가정하자.
+
+```kotlin
+interface TestService {
+    fun updatePost(id: String): Boolean
+}
+```
+여기서 updatePost에 유효하지 않은 아이디가 들어간경우 에러가 발생하는 경우 에러를 throw하도록 설정하고 싶으면 아래와 같이 `every { 실행 } throw 에러`해주면 된다.
+```kotlin
+interface TestService {
+    fun updatePost(id: String): Boolean
+}
+
+class MockKTest {
+    private val testService = mockk<TestService>()
+
+    @Test
+    fun updatePostErrorTest() {
+        val invalidId = "error"
+        every {
+            testService.updatePost(invalidId)
+        } throws NotFoundException()
+
+        assertThrows<NotFoundException> { testService.updatePost(invalidId) }
+    }
+}
+``` 
+## Mocking 라이브러리를 사용하는 이유
+이런식으로 Mocking 라이브러리를 사용하면(정확히 말하면 Mocking된 객체를 사용하면) 테스트 하려는 코드에 집중할 수 있게 되는 장점이 있다. Mock은 수동으로 하는 방법과 이렇게 라이브러리를 사용하는 방식이 있는데, 라이브러리를 사용하면 Mock 객체의 특정 동작만 stub할 수 있어 수동으로 구현했을떄보다 더 빠르고 쉽게 테스트 코드를 작성할 수 있다. 
 
 ## 참고
-- https://notwoods.github.io/mockk-guidebook/docs/mocking/stubbing/
+- [https://notwoods.github.io/mockk-guidebook/docs/mocking/stubbing/](https://notwoods.github.io/mockk-guidebook/docs/mocking/stubbing/)
+- [https://happy-coding-day.tistory.com/entry/Mock-%EA%B0%9D%EC%B2%B4%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%BC%EA%B9%8C-%EC%99%9C-%EC%8D%A8%EC%95%BC%EB%90%A0%EA%B9%8C](https://happy-coding-day.tistory.com/entry/Mock-%EA%B0%9D%EC%B2%B4%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%BC%EA%B9%8C-%EC%99%9C-%EC%8D%A8%EC%95%BC%EB%90%A0%EA%B9%8C)
 
 
 
