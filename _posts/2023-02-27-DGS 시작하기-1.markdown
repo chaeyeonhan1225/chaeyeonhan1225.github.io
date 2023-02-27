@@ -1,0 +1,94 @@
+---
+layout: post
+title:  "DGS 시작하기-1"
+future: true
+date:   2023-02-27 00:00:00 +0900
+categories: SpringBoot Kotlin GraphQL
+---
+
+DGS는 Spring Boot에서 Java, Kotlin을 사용하여 GraphQL 서버를 만드는 프레임워크이다.
+
+어노테이션으로 쿼리, 뮤테이션을 쉽게 작성할 수 있으며, 테스트 기능도 제공한다.
+
+# 시작하기
+
+1. 스프링 프로젝트 만들기
+    - DGS는 Spring Web에 dependency가 있으므로 꼭 선택해준다.
+2. `build.gradle.kts` 에 dgs를 추가한다.
+    ```gradle
+    dependencies {
+        implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
+        implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+    }
+    ```
+3. gql 스키마를 작성한다. 기본 경로는 `/resorce/schema/schema.graphql` 이다. (만약 다른 방식을 사용하고 싶다면 설정`dgs.graphql.schema-locations`을 수정하면된다. default는 `classpath*:schema/**/*.graphql*`)
+    
+    ```graphql
+    type User {
+        id: ID!
+        nickname: String!
+    }
+    
+    type Query {
+        users: [User!]!
+    }
+    ```
+    
+4. 그대로 실행하면 에러가 발생할것이다. 타입에 대응하는 리졸버가 없기 때문이다.
+5. 리졸버를 작성한다. 리졸버를 가진 클래스는 반드시 `@DgsComponent` 어노테이션이 있어야 한다.
+    - 리졸버는 기본적으로 함수에 `@DgsData` 라는 어노테이션을 사용한다. 이 어노테이션에는 parentType, field가 있는데 field는 따로 선언해주지 않으면 **함수명을 사용**한다. 그러므로 따로 filed를 선언할것이 아니라면 함수명을 쿼리, 뮤테이션명과 똑같이 사용하면 된다.
+    - `@DgsQuery` 와 `@DgsMutation` 은 `@DgsData` 에 parentType을 Query, Mutation으로 추가한것이다.
+    
+    ```kotlin
+    @DgsComponent
+    class UserFetcher {
+        private val dummyUsers = listOf<User>(User(id = 1L, nickname = "chaeyeon"), User(id = 2L, nickname = "tester"))
+    
+        @DgsQuery
+        // @DgsData(parentType = "Query", field = "users")
+        fun users(): List<User> {
+            return dummyUsers
+        }
+    }
+    ```
+    
+6. 이제 실행하면 `/graphql` 로 요청할 수 있다. 만약 플레이그라운드를 확인하고 싶다면(Introspection) 브라우저에서 `/graphiql` 로 접속하면 아래와 같은 화면이 나올것이다. 여기서 테스트 하면된다.
+    ![](/assets/img/graphiql-getusers.png)
+7. 간단한 뮤테이션을 추가해보자. 뮤테이션도 위와 마찬가지로 `@DgsCompont` 클래스 안의 함수로 만들어주면 된다.
+    
+    schema.graphql
+    ```graphql
+    type User {
+        id: ID!
+        nickname: String!
+    }
+    
+    type Query {
+        users: [User!]!
+    }
+    
+    input UserParam {
+        nickname: String!
+    }
+    
+    type Mutation {
+        createUser(param: UserParam!): User!
+    }
+    ```
+    UserMutation.kt
+    ```kotlin
+    @DgsComponent
+    class UserMutation(
+        private val application: UserApplication
+    ) {
+        @DgsMutation
+        fun createUser(@InputArgument param: UserParam): User {
+            return application.createUser(param)
+        }
+    }
+    ```
+    
+    뮤테이션의 파라미터는 `@InputArgument` 로 받을 수 있다. `@DgsMutation` 은 `@DgsData(parentType = "Mutation")` 과 같다.
+
+## 참고
+- DGS 공식문서 <https://netflix.github.io/dgs/>
